@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Servo.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>  //  ESP8266WebServer库
@@ -7,8 +8,8 @@
 Servo myservo;                                            //初始化舵机
 ESP8266WebServer esp8266_server(80);                      // 建立ESP8266WebServer对象，对象名称为esp8266_server
 WiFiUDP udp;                                              //udp通信
-NTPClient timeClient(udp, "pool.ntp.org", 28800, 60000);  //ntp初始化
-const char* STAssid = "MERCURY";
+// NTPClient timeClient(udp, "pool.ntp.org", 28800, 60000);  //ntp初始化
+const char* STAssid = "iot";
 const char* STApassword = "question";
 
 int ServoPin = 14;
@@ -41,30 +42,34 @@ void gotoWifi() {
   Serial.print("\r\nIP address:");
   Serial.println(WiFi.localIP());  //连接成功，led熄灭，打印自己的IP
 
-  timeClient.begin();
-  timeClient.update();  // 获取当前时间
+  // timeClient.begin();
+  // timeClient.update();  // 获取当前时间
   // 获取当前小时和分钟
-  int currentHour = timeClient.getHours();
-  int currentMinute = timeClient.getMinutes();
-  Serial.print("Current Time: ");
-  Serial.print(currentHour);
-  Serial.print(":");
-  Serial.println(currentMinute);
-
-  // 判断是否在20:00-01:00之间
-  if (currentHour >= begin_hour || currentHour < 1) {
-    // 如果当前时间在 20:00 到 01:00 之间，启动Web服务
+  // int currentHour = timeClient.getHours();
+  // int currentMinute = timeClient.getMinutes();
+  // Serial.print("Current Time: ");
+  // Serial.print(currentHour);
+  // Serial.print(":");
+  // Serial.println(currentMinute);
     esp8266_server.begin();                           //  详细讲解请参见太极创客网站《零基础入门学用物联网》
     esp8266_server.on("/", HTTP_GET, handleRoot);     // 设置服务器根目录即'/'的函数'handleRoot'
     esp8266_server.on("/LED", HTTP_POST, handleLED);  // 设置处理LED控制请求的函数'handleLED'
     esp8266_server.onNotFound(handleNotFound);
     Serial.println("HTTP esp8266_server started");  //  告知用户ESP8266网络服务功能已经启动
-  } else {
-    // 如果当前时间不在 20:00 到 01:00 之间，进入深度睡眠
-    Serial.println("Entering deep sleep mode...");
-    //进入轻度睡眠
-    ESP.deepSleep(30e9);
-  }
+  // 判断是否在20:00-01:00之间
+  // if (currentHour >= begin_hour || currentHour < 1) {
+  //   // 如果当前时间在 20:00 到 01:00 之间，启动Web服务
+  //   esp8266_server.begin();                           //  详细讲解请参见太极创客网站《零基础入门学用物联网》
+  //   esp8266_server.on("/", HTTP_GET, handleRoot);     // 设置服务器根目录即'/'的函数'handleRoot'
+  //   esp8266_server.on("/LED", HTTP_POST, handleLED);  // 设置处理LED控制请求的函数'handleLED'
+  //   esp8266_server.onNotFound(handleNotFound);
+  //   Serial.println("HTTP esp8266_server started");  //  告知用户ESP8266网络服务功能已经启动
+  // } else {
+  //   // 如果当前时间不在 20:00 到 01:00 之间，进入深度睡眠
+  //   Serial.println("Entering deep sleep mode...");
+  //   //进入轻度睡眠
+  //   ESP.deepSleep(30e9);
+  // }
 }
 
 void handleRoot() {
@@ -93,7 +98,7 @@ void handleLED() {
   String action = esp8266_server.arg("action");  // 获取按钮提交的值
 
   if (action == "on") {
-    myservo.write(180);              // 打开LED
+    myservo.write(150);              // 打开LED
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
 
     delay(1000);
@@ -101,7 +106,7 @@ void handleLED() {
     digitalWrite(LED_BUILTIN, HIGH);  // turn the LED off by making the voltage HIGH
 
   } else if (action == "off") {
-    myservo.write(0);                // 打开LED
+    myservo.write(15);                // 打开LED
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
     delay(1000);
     myservo.write(90);                // 关闭LED
@@ -119,15 +124,15 @@ void loop() {
     WiFi.begin(STAssid, STApassword);
     gotoWifi();
   }  //检查wifi连接状态，若断开则重连
-
-  timeClient.begin();
-  timeClient.update();  // 获取当前时间
+esp8266_server.handleClient();
+  // timeClient.begin();
+  // timeClient.update();  // 获取当前时间
   // 获取当前小时和分钟
-  int currentHour = timeClient.getHours();
-  int currentMinute = timeClient.getMinutes();
-  if (currentHour >= begin_hour || currentHour < 2) {
-    esp8266_server.handleClient();// 处理http服务器访问
-  } else {
-    ESP.deepSleep(30e9);
-  }
+  // int currentHour = timeClient.getHours();
+  // int currentMinute = timeClient.getMinutes();
+  // if (currentHour >= begin_hour || currentHour < 2) {
+  //   esp8266_server.handleClient();// 处理http服务器访问
+  // } else {
+  //   ESP.deepSleep(30e9);
+  // }
 }
