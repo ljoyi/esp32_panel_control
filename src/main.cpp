@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <Servo.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>  //  ESP8266WebServer库
@@ -98,17 +97,23 @@ void handleLED() {
   String action = esp8266_server.arg("action");  // 获取按钮提交的值
 
   if (action == "on") {
-    myservo.write(150);              // 打开LED
+  //  myservo.write(15); 
+  //  delay(100);     
+    myservo.write(180);              // 打开LED
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
 
-    delay(1000);
+    delay(200);
+
+    
     myservo.write(90);
     digitalWrite(LED_BUILTIN, HIGH);  // turn the LED off by making the voltage HIGH
 
   } else if (action == "off") {
+       myservo.write(150); 
+   delay(100);
     myservo.write(15);                // 打开LED
     digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
-    delay(1000);
+    delay(200);
     myservo.write(90);                // 关闭LED
     digitalWrite(LED_BUILTIN, HIGH);  // turn the LED off by making the voltage HIGH
 
